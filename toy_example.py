@@ -9,8 +9,9 @@ from dask.dot import dot_graph
 from dask.distributed import Client, LocalCluster
 from dask.distributed import Scheduler
 from skimage.filters import threshold_otsu
-from skimage import data
-
+from skimage.feature import blob_dog, blob_log, blob_doh
+from skimage import data, segmentation, color, filters, io
+from skimage.future import graph 
 
 sample = skimage.io.imread('/Users/nivethamahalakshmibalasamy/Documents/ECI-PolarScience/dask_stuff/grayscale-xy-1376.png')
 im = data.camera()
@@ -66,6 +67,7 @@ def array_images():
 	# map the otsu thresholding function
 	#print stack[0]
 	stack = da.map_blocks(otsu_thresholding, stack, chunks = (5,2000,2000), dtype = sample.dtype)
+	stack = da.map_blocks(blob_detection, stack, chunks = (5,2000,2000), dtype = sample.dtype)
 	stack = client.persist(stack)
 	#th = client.persist(th)
 	#thresholded.visualize()
@@ -97,13 +99,21 @@ def otsu_thresholding(image):
 	return binary
 
 
-
-
-
 def otsu():
 	threshold = threshold_otsu(im)
 	bin = im > threshold
 	print bin
+
+
+def segmentation(image):
+	label = segmentation.slic(image, compactness = 30, n_segments = 40)
+
+
+def blob_detection(image):
+	blobs_doh = blob_doh(image, max_sigma=30, threshold=.01)
+	print blob_doh	
+	
+
 
 
 
