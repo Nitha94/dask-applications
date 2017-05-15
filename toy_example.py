@@ -47,11 +47,11 @@ def array_images():
 	print "After rechunking: "
 	temp = stack
 	#temp.visualize()
-	#print "Before distributing to workers:"
-	#print stack.mean().compute()
-	#print stack[1, :].compute()
-	#print stack[19, :].mean().compute()
-	#stack.visualize()
+	print "Before distributing to workers:"
+	print stack.mean().compute()
+	print stack[1, :].compute()
+	print stack[19, :].mean().compute()
+	stack.visualize()
 
 	# Distribute array components over workers and centralized scheduler
 	cluster = LocalCluster()
