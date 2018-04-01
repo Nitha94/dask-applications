@@ -1,0 +1,36 @@
+#PBS -l nodes=8:ppn=20
+#PBS -l walltime=00:15:00
+#PBS -q workq
+#PBS -A TG-MCB090174
+#PBS -o thresh.out
+#PBS -e thresh.err
+#PBS -S /bin/bash
+
+echo "number of nodes"
+export PBS_NUM_NODES=`wc -l ${PBS_NODEFILE} | cut -f1 -d" "`
+echo $PBS_NUM_NODES
+echo "===================="
+echo "ssh into each node"
+
+#====================================================================
+scheduler_node=$(head -1 $PBS_NODEFILE)
+hostIndex=0
+for host in `cat $PBS_NODEFILE`; do
+    echo "Working on $host ...."
+    if [ "$hostIndex" = "0" ]; then
+        echo "run dscheduler"
+        ssh $host dask-scheduler --port=8786 &
+        sleep 5
+    else
+        echo "run dworker"
+        ssh $host dask-worker --nprocs 1 --nthreads 1  $scheduler_node:8786 &
+        sleep 1
+    fi
+    hostIndex="1"
+done
+
+echo "====-get to work-===="
+
+ssh $scheduler_node
+python /home/path/program_name.py $scheduler_node:8786
+exit
